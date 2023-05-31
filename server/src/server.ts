@@ -1,14 +1,17 @@
 import fastify from "fastify";
 import cors from "@fastify/cors";
 import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client"
 
 dotenv.config();
+const port: any = process.env.PORT;
+
+const prisma = new PrismaClient();
+
 const server = fastify();
 
-
-
 server.register(cors, {
-    
+
 });
 
 
@@ -17,7 +20,25 @@ server.get('/', (request, reply) => { //request pedido, reply retorno
     return "Servidor Exemplo On Line..."
 });
 
-const port: any = process.env.PORT;
+
+interface UserAttrs {
+    email: string,
+    password: string,
+}
+
+server.post<{ Body: UserAttrs}>('/user', async (request, reply) => {
+    const { email, password } = request.body;
+
+    const newUser = await prisma.user.create({
+        data: {
+            email : "fabiomarques@gmail.com",
+            password,
+        }
+    });
+
+    return reply.status(201).send(newUser);
+});
+
 
 server.listen({ port: 3000}, (error, address) => {
     if (error) {
